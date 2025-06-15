@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "Insta Pilot",
+  "version": "1.0",
+  "description": "Instagram Automation and Data Scraping Tool ",
+  "permissions": ["scripting", "storage", "activeTab","tabs", "cookies"],
+"host_permissions": [
+  "*://*.instagram.com/*",
+  "https://extensionpay.com/*",
+  "<all_urls>"
+],
+"action": {
+  "default_title": "Insta Pilot"
+},
+  "content_scripts": [
+    {
+      "matches": ["https://*.instagram.com/*"],
+      "js": ["content/content-script.js"],
+      "run_at": "document_idle" 
+    }
+  ],
+ "web_accessible_resources": [
+    {
+      "resources": [
+        "ui/*",
+        "assets/*",
+        "*.js",
+        "*.png",
+        "*.css",
+        "*.json",
+        "*.html"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+
+
+"background": {
+    "service_worker": "background.js"
+}
+
+}

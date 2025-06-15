@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InstaPilot</title>
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="img-src * data: blob:;"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Sidebar -->
+      <section class="sidebar-container">
+        <aside class="sidebar">
+          <div class="sidebar-header">📸 InstaPilot</div>
+          <nav class="nav-menu">
+            <ul>
+              <li data-tab="accounts" class="active">Accounts Queue</li>
+              <li data-tab="media">Media Queue</li>
+              <li data-tab="filters">Filters</li>
+              <li data-tab="settings">Settings</li>
+              <li data-tab="logs">Logs</li>
+              <li data-tab="updates">Updates</li>
+              <li data-tab="help">Help & FAQs</li>
+            </ul>
+          </nav>
+        </aside>
+      </section>
+
+      <!-- Main -->
+      <section class="main-section">
+        <div class="main">
+          <header class="top-header">
+            <h1>InstaPilot</h1>
+            <span
+              id="countdownTimer"
+              style="
+                margin-top: 5px;
+                margin-right: 60px;
+                font-size: 16px;
+                font-weight: 800;
+                color: #fff;
+              "
+            ></span>
+          </header>
+          <section class="main-content">
+            <!-- Accounts Queue -->
+            <div id="accounts-tab" class="tab-content active">
+              <div class="account-bar">
+                <h2>👥 ACCOUNTS QUEUE</h2>
+              </div>
+              <!-- Action Bar -->
+              <div class="action-bar">
+                <div class="dropdown">
+                  <button class="dropbtn">Load Accounts ⬇</button>
+                  <div class="dropdown-content">
+                    <a href="#" id="load-followers">Load Account's Followers</a>
+                    <a href="#" id="following">Load Account's Following</a>
+                    <a href="#" id="load-likers">Load Post's/Reel's Likers</a>
+                    <a href="#" id="commenters"
+                      >Load Post's/Reel's Commenters</a
+                    >
+                    <label>
+                      Limit Queue:
+                      <input
+                        type="number"
+                        min="1"
+                        id="account-limit"
+                        placeholder="e.g. 10"
+                        value="10"
+                    /></label>
+                    <div class="scrape-mode-options">
+                      <label
+                        ><input
+                          type="radio"
+                          name="scrapeMode"
+                          value="light"
+                          checked
+                        />
+                        Load Only Usernames and Profile Pics</label
+                      >
+                      <br />
+                      <label>
+                        <input type="radio" name="scrapeMode" value="full" />
+                        Load All Information of Accounts (Max: 100)</label
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dropdown">
+                  <button class="dropbtn">Select ⬇</button>
+                  <div class="dropdown-content">
+                    <a href="#" id="select-all-rows">Select All</a>
+                    <a href="#" id="select-none-rows">Select None</a>
+                    <a href="#" id="remove-selected-rows">Remove Selected</a>
+                  </div>
+                </div>
+
+                <div class="dropdown">
+                  <button class="dropbtn">Process Queue ⬇</button>
+                  <div class="dropdown-content">
+                    <label
+                      ><input
+                        type="radio"
+                        name="process-action"
+                        value="follow"
+                        checked
+                      />
+                      Follow</label
+                    >
+                    <label>
+                      <input
+                        type="radio"
+                        name="process-action"
+                        value="follow-like1"
+                      />
+                      Follow + Like 1st Pic
+                    </label>
+                    <label
+                      ><input
+                        type="radio"
+                        name="process-action"
+                        value="like-only"
+                      />
+                      Like Only</label
+                    >
+                    <label
+                      ><input
+                        type="radio"
+                        name="process-action"
+                        value="unfollow"
+                      />
+                      Unfollow</label
+                    >
+                    <label
+                      ><input
+                        type="radio"
+                        name="process-action"
+                        value="remove"
+                      />
+                      Remove Follower</label
+                    >
+                    <label
+                      ><input
+                        type="radio"
+                        name="process-action"
+                        value="block"
+                      />
+                      Block</label
+                    >
+
+                    <label>
+                      <input type="radio" name="process-action" value="story" />
+                      Watch Story <br />
+                      <input
+                        name="process-action"
+                        type="checkbox"
+                        id="like-while-watching"
+                      />
+                      Like Story While Watching
+                    </label>
+                  </div>
+                </div>
+                <button id="process-queue-btn">🚀 Start Processing</button>
+              </div>
+
+              <!-- Status Bar -->
+              <div id="scrape-status"></div>
+
+              <!-- Queue Table Placeholder -->
+              <div class="queue-table">
+                <div class="queue-controls">
+                  <button class="export-btn" id="export-csv">
+                    📤 Export CSV
+                  </button>
+                  <button class="save-btn" id="save-queue">
+                    💾 Save Queue
+                  </button>
+                  <button class="save-btn" id="load-queue">
+                    📥 Load Queue
+                  </button>
+                </div>
+
+                <div
+                  id="scraping-status-container"
+                  style="margin-bottom: 16px; display: none"
+                >
+                  <h2
+                    id="scraping-status-heading"
+                    style="
+                      margin-bottom: 4px;
+                      color: white;
+                      font-size: 1.4em;
+                      font-weight: 800;
+                      letter-spacing: 0.5px;
+                    "
+                  >
+                    Scraping has started, please wait...
+                  </h2>
+                  <div
+                    id="scraping-status-detail"
+                    style="font-size: 1.1em; color: #fff"
+                  ></div>
+                </div>
+
+                <div class="table-wrapper">
+                  <div class="table-container">
+                    <table class="queue-data-table">
+                      <thead>
+                        <tr
+                          data-userid="${account.id}"
+                          data-username="username_here"
+                        >
+                          <th>
+                            <input type="checkbox" id="select-all-checkbox" />
+                          </th>
+                          <th class="profile-pic-col">Pic</th>
+                          <th>@Username</th>
+                          <th>Full Name</th>
+                          <th>Bio</th>
+                          <th>Posts</th>
+                          <th>Followers</th>
+                          <th>Following</th>
+                          <th>Follows me</th>
+                          <th>Followed by me</th>
+                          <th>Mutual</th>
+                          <th>Private</th>
+                          <th>Verified</th>
+                          <th>Business Category</th>
+                        </tr>
+                      </thead>
+                      <tbody id="accounts-tbody">
+                        <!-- Rows will be added dynamically here -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div class="pagination">
+                  <button id="prev-page" class="page-btn">&laquo;</button>
+                  <span id="page-info" class="page-info">Page 1 of 1</span>
+                  <button id="next-page" class="page-btn">&raquo;</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Media Queue Tab -->
+            <div id="media-tab" class="tab-content">
+              <div class="account-bar">
+                <h2>🖼️ MEDIA QUEUE</h2>
+              </div>
+
+              <!-- Action Bar -->
+              <div class="action-bar">
+                <!-- Load Media Dropdown -->
+                <div class="dropdown">
+                  <button class="dropbtn">Load Media Queue ⬇</button>
+                  <div class="dropdown-content">
+                    <label
+                      ><a href="#" id="load-feed-media"
+                        >Load Media from Feed Page</a
+                      ></label
+                    >
+                    <label
+                      ><a href="#" id="load-location-media"
+                        >Load Media from Location Page</a
+                      ></label
+                    >
+                    <label
+                      ><a href="#" id="load-hashtag-media"
+                        >Load Media from Hashtags Page</a
+                      ></label
+                    >
+                    <label
+                      >Limit Queue:
+                      <input
+                        type="number"
+                        min="1"
+                        id="media-limit"
+                        style="width: 80px"
+                        placeholder="e.g. 10"
+                        value="10"
+                    /></label>
+                  </div>
+                </div>
+
+                <div class="dropdown">
+                  <button class="dropbtn">Select ⬇</button>
+                  <div class="dropdown-content">
+                    <a href="#" id="select-all-media-rows">Select All</a>
+                    <a href="#" id="select-none-media-rows">Select None</a>
+                    <a href="#" id="remove-selected-media-rows"
+                      >Remove Selected</a
+                    >
+                  </div>
+                </div>
+
+                <!-- Like Button -->
+                <button class="dropbtn like-btn" id="like-media-queue-btn">
+                  ❤️ Like Media Queue
+                </button>
+              </div>
+
+              <!-- Media Table -->
+              <div class="queue-table">
+                <div class="queue-controls"></div>
+                <div class="table-wrapper">
+                  <div class="table-container">
+                    <div
+                      id="media-scraping-status-container"
+                      style="margin-bottom: 16px; display: none"
+                    >
+                      <h2
+                        id="media-scraping-status-heading"
+                        style="
+                          margin-bottom: 4px;
+                          color: white;
+                          font-size: 1.4em;
+                          font-weight: 800;
+                          letter-spacing: 0.5px;
+                        "
+                      ></h2>
+                      <div
+                        id="media-scraping-status-detail"
+                        style="font-size: 1.1em; color: #fff"
+                      ></div>
+                    </div>
+
+                    <table class="queue-data-table">
+                      <thead>
+                        <tr>
+                          <th>
+                            <input
+                              type="checkbox"
+                              id="select-all-media-checkbox"
+                            />
+                          </th>
+                          <th id="media-id-header">Media Id</th>
+                          <th>Pic</th>
+                          <th>Username</th>
+                          <th class="stamp-col">Date Taken</th>
+                          <th>Caption</th>
+                          <th>Type</th>
+                          <th>Comments</th>
+                          <th class="likes-col">Likes</th>
+                        </tr>
+                      </thead>
+                      <tbody id="media-tbody">
+                        <!-- Media rows dynamically added -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div class="pagination">
+                  <button id="media-prev-page" class="page-btn">&laquo;</button>
+                  <span id="media-page-info" class="page-info"
+                    >Page 1 of 1</span
+                  >
+                  <button id="media-next-page" class="page-btn">&raquo;</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filters Tab -->
+            <div id="filters-tab" class="tab-content">
+              <div class="account-bar">
+                <h2>🧪 FILTER ACCOUNTS</h2>
+              </div>
+
+              <div class="filters-grid">
+                <!-- Numeric Range Filters -->
+                <div class="filter-card">
+                  <h3>📊 Metrics Range</h3>
+                  <div class="range-group">
+                    <div class="range-fields">
+                      <label> Followers:</label>
+                      <span>
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder="0"
+                          id="filter-followers-min"
+                        />
+                        -
+                        <input
+                          type="number"
+                          id="filter-followers-max"
+                          min="0"
+                          max="1000000000"
+                          placeholder="1000000000"
+                        />
+                      </span>
+                    </div>
+
+                    <div class="range-fields">
+                      <label>Following:</label>
+                      <span
+                        ><input
+                          type="number"
+                          min="0"
+                          placeholder="0"
+                          id="filter-following-min" />
+                        -
+                        <input
+                          type="number"
+                          id="filter-following-max"
+                          min="0"
+                          max="1000000000"
+                          placeholder="1000000000"
+                      /></span>
+                    </div>
+
+                    <div class="range-fields">
+                      <label>Posts:</label>
+
+                      <span>
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder="0"
+                          id="filter-posts-min"
+                        />
+                        -
+                        <input
+                          type="number"
+                          min="0"
+                          id="filter-posts-max"
+                          max="1000000000"
+                          placeholder="1000000000"
+                        />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Profile Info Checkboxes -->
+                <div class="filter-card">
+                  <h3>👤 Profile Attributes</h3>
+                  <div class="checkbox-group">
+                    <label
+                      ><input type="checkbox" id="filter-private" /> Private
+                      Account</label
+                    >
+                    <label
+                      ><input type="checkbox" id="filter-public" /> Public
+                      Account</label
+                    >
+                    <label
+                      ><input type="checkbox" id="filter-verified" />
+                      Verified</label
+                    >
+                    <label
+                      ><input type="checkbox" id="filter-not-verified" /> Not
+                      Verified</label
+                    >
+                  </div>
+                </div>
+
+                <!-- Bio & Link Info -->
+                <div class="filter-card">
+                  <h3>👨‍💼 Biography</h3>
+                  <div class="text-inputs">
+                    <label
+                      >Bio Has Text:
+                      <input
+                        type="text"
+                        placeholder="e.g. designer"
+                        id="filter-bio-has"
+                    /></label>
+                    <label
+                      >Bio Doesn't Have Text:
+                      <input
+                        type="text"
+                        placeholder="e.g. bot"
+                        id="filter-bio-not-has"
+                    /></label>
+                  </div>
+                </div>
+
+                <!-- Business Info -->
+                <div class="filter-card">
+                  <h3>🏢 Business Info</h3>
+                  <div class="checkbox-group">
+                    <label
+                      ><input type="checkbox" id="filter-business" /> Business
+                      Account</label
+                    >
+                    <label
+                      ><input type="checkbox" id="filter-not-business" /> Not
+                      Business Account</label
+                    >
+                  </div>
+                  <div class="text-inputs">
+                    <label class="business-category-label"
+                      >Business Category Has Text:
+                      <input
+                        type="text"
+                        placeholder="e.g. fitness"
+                        id="filter-business-cat-has"
+                      />
+                    </label>
+                    <label
+                      >Business Category Doesn't Have Text:
+                      <input
+                        type="text"
+                        placeholder="e.g. crypto"
+                        id="filter-business-cat-not-has"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Follow-Specific Filters -->
+                <div class="filter-card full-width">
+                  <h3>🔁 Follow Status (Only for Following)</h3>
+                  <div class="checkbox-group horizontal">
+                    <label
+                      ><input type="checkbox" id="filter-follows-me" /> Follows
+                      Me</label
+                    >
+                    <label
+                      ><input type="checkbox" id="filter-not-follows-me" />
+                      Doesn't Follow Me</label
+                    >
+                    <label
+                      ><input type="checkbox" id="filter-followed-by-me" />
+                      Followed by Me</label
+                    >
+                    <label
+                      ><input type="checkbox" id="filter-not-followed-by-me" />
+                      Not Followed by Me</label
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Filter Buttons -->
+              <div class="filter-buttons">
+                <button class="apply-btn">Apply Filters</button>
+                <button class="reset-btn">Reset Filters</button>
+              </div>
+            </div>
+            <!-- Settings Tab -->
+
+            <div id="settings-tab" class="tab-content">
+              <div class="account-bar">
+                <h2>⚙️ SETTINGS</h2>
+              </div>
+              <div class="settings-grid">
+                <!-- 1. Performance Options -->
+                <div class="setting-card">
+                  <h3 class="card-toggle">🚀 Performance Options</h3>
+                  <div class="card-content">
+                    <div class="checkbox-group">
+                      <label
+                        ><input
+                          type="checkbox"
+                          id="show-stamps-in-queue"
+                          checked
+                        />
+                        Show stamps in queue</label
+                      >
+                      <label
+                        ><input
+                          type="checkbox"
+                          id="show-queue-on-screen"
+                          checked
+                        />
+                        Show Queue on Screen</label
+                      >
+                      <label
+                        ><input type="checkbox" id="remove-unchecked-columns" />
+                        Remove Unchecked Columns From Queue Data</label
+                      >
+                      <label
+                        ><input
+                          type="checkbox"
+                          id="show-likes-in-queue"
+                          checked
+                        />
+                        Show likes in queue</label
+                      >
+                      <label
+                        ><input
+                          type="checkbox"
+                          id="show-profile-pictures-in-queue"
+                          checked
+                        />
+                        Show profile pictures in queue</label
+                      >
+                      <label
+                        ><input type="checkbox" id="not-now-notification" />
+                        Click 'Not Now' when Instagram asks to show
+                        notifications</label
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2. Configure Wait Times -->
+                <div class="setting-card">
+                  <h3 class="card-toggle">⏳ Configure Wait Times</h3>
+                  <div class="card-content">
+                    <div class="input-group">
+                      <label
+                        >Wait
+                        <input
+                          type="number"
+                          id="wait-after-follow"
+                          value="30"
+                        />
+                        seconds after every user
+                        follow/unfollow/like/block/remove-follower/like-only-unfollow</label
+                      >
+                      <label
+                        >Wait
+                        <input type="number" id="wait-after-skip" value="1" />
+                        seconds after skip</label
+                      >
+                      <label
+                        >Randomize wait time by up to
+                        <input
+                          type="number"
+                          id="randomize-wait"
+                          value="50"
+                        />%</label
+                      >
+
+                      <label
+                        >Retry
+                        <input
+                          type="number"
+                          id="retry-soft-rate-limit"
+                          value="10"
+                        />
+                        minutes after soft rate limit</label
+                      >
+                      <label
+                        >Retry
+                        <input
+                          type="number"
+                          id="retry-hard-rate-limit"
+                          value="1"
+                        />
+                        hours after hard rate limit</label
+                      >
+                      <label
+                        >Retry
+                        <input
+                          type="number"
+                          id="retry-429-rate-limit"
+                          value="10"
+                        />
+                        minutes after 429 rate limit</label
+                      >
+                      <label
+                        >Retry
+                        <input type="number" id="retry-after-404" value="10" />
+                        times after 404 error getting additional info</label
+                      >
+                      <label
+                        >Wait
+                        <input
+                          type="number"
+                          id="wait-after-50-actions"
+                          value="24"
+                        />
+                        hours after performing 50 follows/unfollows</label
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. Unfollowing / Removing -->
+                <div class="setting-card">
+                  <h3 class="card-toggle">🚫 Unfollowing / Removing Options</h3>
+                  <div class="card-content">
+                    <div class="checkbox-group">
+                      <label
+                        ><input
+                          type="checkbox"
+                          id="dont-unfollow-followers"
+                          checked
+                        />
+                        Don't unfollow people who follow me</label
+                      >
+                      <label
+                        ><input type="checkbox" id="unfollow-days-ago" />
+                        Unfollow people I began following more than
+                        <input
+                          type="number"
+                          id="unfollow-days-ago-number"
+                          placeholder="30"
+                          style="width: 60px"
+                        />
+                        days ago (even if they follow me)</label
+                      >
+                      <label
+                        ><input type="checkbox" id="dont-unfollow-less-days" />
+                        Don't unfollow people I began following less than
+                        <input
+                          type="number"
+                          id="dont-unfollow-less-days-number"
+                          placeholder="3"
+                          style="width: 60px"
+                        />
+                        days ago</label
+                      >
+                      <label
+                        ><input
+                          type="checkbox"
+                          id="dont-unfollow-match-filters"
+                          checked
+                        />
+                        Don't unfollow people who match my filters</label
+                      >
+                      <label
+                        ><input
+                          type="checkbox"
+                          id="dont-remove-block-match-filters"
+                          checked
+                        />
+                        Don't remove or block people who match my filters</label
+                      >
+                    </div>
+                  </div>
+                </div>
+                <!-- <button id="reset-default-settings" style="margin-top: 10px">
+                  Reset to Default
+                </button> -->
+              </div>
+            </div>
+
+            <!-- Logs Tab -->
+            <div id="logs-tab" class="tab-content">
+              <div class="account-bar">
+                <h2>📜 LOGS</h2>
+              </div>
+
+              <div class="logs-container">
+                <ul class="logs-list" id="logs-list">
+                  <!-- Logs will be dynamically added here -->
+                  <li class="log-entry">
+                    <span class="log-time">[2025-04-11 12:45 PM]</span>
+                    <span class="log-text">Extension started</span>
+                  </li>
+                  <li class="log-entry">
+                    <span class="log-time">[2025-04-11 12:46 PM]</span>
+                    <span class="log-text">User logged in</span>
+                  </li>
+                  <li class="log-entry">
+                    <span class="log-time">[2025-04-11 12:48 PM]</span>
+                    <span class="log-text">Fetched followers of @ronaldo</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Updates Tab -->
+            <div id="updates-tab" class="tab-content">
+              <div class="account-bar">
+                <h2>📰 NEWS & UPDATES</h2>
+              </div>
+
+              <div class="updates-container">
+                <div class="update-card">
+                  <div class="update-header">
+                    <span class="version">v1.2.0</span>
+                    <span class="update-date">2025-04-10</span>
+                  </div>
+                  <ul class="update-list">
+                    <li>➕ Added media queue tab with live scraping support</li>
+                    <li>✨ Improved filters UI layout</li>
+                    <li>🐛 Fixed issue with checkboxes not applying filters</li>
+                  </ul>
+                </div>
+
+                <div class="update-card">
+                  <div class="update-header">
+                    <span class="version">v1.1.0</span>
+                    <span class="update-date">2025-04-07</span>
+                  </div>
+                  <ul class="update-list">
+                    <li>🚀 Initial version account queue and media queue</li>
+                    <li>🎨 New dark UI theme applied</li>
+                    <li>✅ Settings and collapsible cards added</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <!-- Help & FAQs Tab -->
+            <div id="help-tab" class="tab-content">
+              <div class="account-bar">
+                <h2>❓ HELP & FAQs</h2>
+              </div>
+
+              <div class="faq-container">
+                <!-- Accordion Item -->
+                <div class="faq-item">
+                  <button class="faq-question">
+                    📌 How does the extension work?
+                  </button>
+                  <div class="faq-answer">
+                    <p>
+                      Once installed, the extension activates when you're on
+                      Instagram or Facebook. You'll see a toggle icon on the top
+                      right. Clicking it opens the extension panel over the
+                      site. You can then perform actions like loading followers,
+                      media, applying filters, and automating likes/follows.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="faq-item">
+                  <button class="faq-question">
+                    👥 How to use the Accounts Queue?
+                  </button>
+                  <div class="faq-answer">
+                    <p>
+                      Navigate to the “Accounts Queue” tab, use the “Load
+                      Accounts” dropdown to select a source (followers, likers,
+                      commenters). Use filters and select the action (follow,
+                      like, unfollow) to process the queue.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="faq-item">
+                  <button class="faq-question">
+                    🖼️ What does the Media Queue do?
+                  </button>
+                  <div class="faq-answer">
+                    <p>
+                      It allows you to load posts from your feed, a profile, or
+                      hashtags. You can like selected media or watch reels with
+                      optional actions like “like while watching.”
+                    </p>
+                  </div>
+                </div>
+
+                <div class="faq-item">
+                  <button class="faq-question">
+                    ⚙️ How do I configure settings?
+                  </button>
+                  <div class="faq-answer">
+                    <p>
+                      Go to the “Settings” tab. Click on any section to expand
+                      it. You can enable performance options, configure wait
+                      times, and manage following/unfollowing rules via
+                      checkboxes and input fields.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="faq-item">
+                  <button class="faq-question">🧪 How to use Filters?</button>
+                  <div class="faq-answer">
+                    <p>
+                      Filters let you refine which accounts to interact with.
+                      You can filter by follower count, bio text, verification,
+                      etc. Apply filters before processing accounts.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>    
+    
+    <script src="script.js"></script>
+  </body>
+</html>
